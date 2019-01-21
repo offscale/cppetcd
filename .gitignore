@@ -8,6 +8,7 @@
 *.d
 *~
 test_runner
+submodules
 
 # Compiled Object files
 *.slo
