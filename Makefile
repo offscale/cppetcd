@@ -29,8 +29,9 @@ ${TEST_RUNNER}: ${TEST_OBJECTS} $(CC_TARGET)
 	${CXX} ${TEST_OBJECTS} -o $@ -L. -lcppetcd  -lgtest $(LDFLAGS)
 
 clean:
-	-rm -rvf *.pb.h *.pb.cc
-	-rm -f $(CC_OBJECTS) $(TEST_OBJECTS)
+	-find ./ -name *.pb.h -exec rm -vf {} \;
+	-find ./ -name *.pb.cc -exec rm -vf {} \;
+	-rm -f $(CC_OBJECTS) $(TEST_OBJECTS) submodules
 
 install: ${CC_TARGET}
 	install -D ${CC_TARGET} $(prefix)/lib/${CC_TARGET}
@@ -48,14 +49,63 @@ PROTOC_OPT=--proto_path=protobuf \
 	--proto_path=. \
 	--cpp_out=src --grpc_out=src
 
-pb:
-	@echo grpc_cpp_plugin=$(PROTOC_GRPC_CPP_PLUGIN)
+submodules:
 	git submodule init
 	git submodule update
-	protoc $(PROTOC_OPT) etcd/etcdserver/etcdserverpb/rpc.proto
-	protoc $(PROTOC_OPT) etcd/etcdserver/api/v3lock/v3lockpb/v3lock.proto
-	protoc $(PROTOC_OPT) protobuf/gogoproto/gogo.proto
-	protoc $(PROTOC_OPT) etcd/mvcc/mvccpb/kv.proto
-	protoc $(PROTOC_OPT) etcd/auth/authpb/auth.proto
-	protoc $(PROTOC_OPT) google/api/annotations.proto
-	protoc $(PROTOC_OPT) google/api/http.proto
+	touch submodules
+
+PROTOS=etcd/etcdserver/etcdserverpb/rpc.proto etcd/etcdserver/api/v3lock/v3lockpb/v3lock.proto \
+protobuf/gogoproto/gogo.proto etcd/mvcc/mvccpb/kv.proto etcd/auth/authpb/auth.proto \
+googleapis/google/api/annotations.proto googleapis/google/api/http.proto
+
+${PROTOS}: submodules
+
+src/cppetcd.cc: src/etcd/etcdserver/etcdserverpb/rpc.pb.h \
+		 src/gogoproto/gogo.pb.h \
+		 src/etcd/mvcc/mvccpb/kv.pb.h \
+		 src/etcd/auth/authpb/auth.pb.h \
+		 src/google/api/annotations.pb.h \
+		 src/google/api/http.pb.h \
+		 src/etcd/etcdserver/api/v3lock/v3lockpb/v3lock.pb.h
+
+src/etcd/etcdserver/api/v3lock/v3lockpb/v3lock.pb.h : etcd/etcdserver/api/v3lock/v3lockpb/v3lock.proto
+	protoc $(PROTOC_OPT) $<
+
+src/etcd/etcdserver/etcdserverpb/rpc.pb.h : etcd/etcdserver/etcdserverpb/rpc.proto
+	protoc $(PROTOC_OPT) $<
+
+src/gogoproto/gogo.pb.h : protobuf/gogoproto/gogo.proto
+	protoc $(PROTOC_OPT) $<
+
+src/etcd/mvcc/mvccpb/kv.pb.h : etcd/mvcc/mvccpb/kv.proto
+	protoc $(PROTOC_OPT) $<
+
+src/etcd/auth/authpb/auth.pb.h : etcd/auth/authpb/auth.proto
+	protoc $(PROTOC_OPT) $<
+
+src/google/api/annotations.pb.h : googleapis/google/api/annotations.proto
+	protoc $(PROTOC_OPT) $<
+
+src/google/api/http.pb.h : googleapis/google/api/http.proto
+	protoc $(PROTOC_OPT) $<
+
+src/etcd/etcdserver/etcdserverpb/rpc.pb.o : src/etcd/etcdserver/etcdserverpb/rpc.pb.cc
+src/etcd/etcdserver/etcdserverpb/rpc.grpc.pb.o : src/etcd/etcdserver/etcdserverpb/rpc.pb.cc
+src/etcd/etcdserver/api/v3lock/v3lockpb/v3lock.pb.o : src/etcd/etcdserver/api/v3lock/v3lockpb/v3lock.pb.cc
+src/etcd/etcdserver/api/v3lock/v3lockpb/v3lock.grpc.pb.o : src/etcd/etcdserver/api/v3lock/v3lockpb/v3lock.pb.cc
+src/gogoproto/gogo.pb.o : src/gogoproto/gogo.pb.cc
+src/google/api/http.pb.o : src/google/api/http.pb.cc
+src/google/api/annotations.pb.o : src/google/api/annotations.pb.cc
+src/etcd/auth/authpb/auth.pb.o : src/etcd/auth/authpb/auth.pb.cc
+src/etcd/mvcc/mvccpb/kv.pb.o : src/etcd/mvcc/mvccpb/kv.pb.cc
+
+src/etcd/etcdserver/etcdserverpb/rpc.pb.cc : src/etcd/etcdserver/etcdserverpb/rpc.pb.h
+src/etcd/etcdserver/etcdserverpb/rpc.grpc.pb.cc : src/etcd/etcdserver/etcdserverpb/rpc.pb.h
+src/etcd/etcdserver/api/v3lock/v3lockpb/v3lock.pb.cc : src/etcd/etcdserver/api/v3lock/v3lockpb/v3lock.pb.h
+src/etcd/etcdserver/api/v3lock/v3lockpb/v3lock.grpc.pb.cc : src/etcd/etcdserver/api/v3lock/v3lockpb/v3lock.pb.h
+src/gogoproto/gogo.pb.cc : src/gogoproto/gogo.pb.h
+src/google/api/http.pb.cc : src/google/api/http.pb.h
+src/google/api/annotations.pb.cc : src/google/api/annotations.pb.h
+src/etcd/auth/authpb/auth.pb.cc : src/etcd/auth/authpb/auth.pb.h
+src/etcd/mvcc/mvccpb/kv.pb.cc : src/etcd/mvcc/mvccpb/kv.pb.h
+
