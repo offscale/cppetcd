@@ -11,10 +11,10 @@ src/etcd/auth/authpb/auth.pb.o src/etcd/mvcc/mvccpb/kv.pb.o
 CC_TARGET=libcppetcd.so
 
 INCLUDES=`pkg-config --cflags protobuf grpc++ grpc` -I./src
-CXXFLAGS += $(INCLUDES) -g -std=c++11 -fPIC
+CXXFLAGS += $(INCLUDES) -std=c++11 -fPIC
 
 LIBS=`pkg-config --libs protobuf grpc++ grpc`
-LDFLAGS=$(LIBS) -lgrpc++_reflection -ldl -g -lglog
+LDFLAGS=$(LIBS) -lgrpc++_reflection -ldl -lglog
 
 all: ${CC_TARGET}
 
