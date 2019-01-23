@@ -9,6 +9,7 @@ src/etcd/etcdserver/api/v3lock/v3lockpb/v3lock.pb.o src/etcd/etcdserver/api/v3lo
 src/gogoproto/gogo.pb.o src/google/api/http.pb.o src/google/api/annotations.pb.o \
 src/etcd/auth/authpb/auth.pb.o src/etcd/mvcc/mvccpb/kv.pb.o
 CC_TARGET=libcppetcd.so
+CC_SHARED=-shared
 
 INCLUDES=`pkg-config --cflags protobuf grpc++ grpc`
 override INCLUDES += -I./src
@@ -20,7 +21,7 @@ override LDFLAGS += -lgrpc++_reflection -ldl -lglog
 all: ${CC_TARGET}
 
 ${CC_TARGET}: ${CC_OBJECTS}
-	$(CXX) $(LDFLAGS) $(LIBS) $(CC_OBJECTS) -shared -o $@
+	$(CXX) $(LDFLAGS) $(LIBS) $(CC_OBJECTS) $(CC_SHARED) -o $@
 
 test: ${TEST_RUNNER}
 	@echo "To run test, locally-running etcd is required."
