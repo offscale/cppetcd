@@ -14,7 +14,7 @@ INCLUDES=`pkg-config --cflags protobuf grpc++ grpc` -I./src
 CXXFLAGS += $(INCLUDES) -std=c++11 -fPIC
 
 LIBS=`pkg-config --libs protobuf grpc++ grpc`
-LDFLAGS=$(LIBS) -lgrpc++_reflection -ldl -lglog
+LDFLAGS += $(LIBS) -lgrpc++_reflection -ldl -lglog
 
 all: ${CC_TARGET}
 
