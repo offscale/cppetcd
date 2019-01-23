@@ -10,23 +10,24 @@ src/gogoproto/gogo.pb.o src/google/api/http.pb.o src/google/api/annotations.pb.o
 src/etcd/auth/authpb/auth.pb.o src/etcd/mvcc/mvccpb/kv.pb.o
 CC_TARGET=libcppetcd.so
 
-INCLUDES=`pkg-config --cflags protobuf grpc++ grpc` -I./src
-CXXFLAGS += $(INCLUDES) -std=c++11 -fPIC
+INCLUDES=`pkg-config --cflags protobuf grpc++ grpc`
+override INCLUDES += -I./src
+override CXXFLAGS += -std=c++11 -fPIC
 
 LIBS=`pkg-config --libs protobuf grpc++ grpc`
-LDFLAGS += $(LIBS) -lgrpc++_reflection -ldl -lglog
+override LDFLAGS += -lgrpc++_reflection -ldl -lglog
 
 all: ${CC_TARGET}
 
 ${CC_TARGET}: ${CC_OBJECTS}
-	$(CXX) $(LDFLAGS) $(CXXFLAGS) $(CC_OBJECTS) -shared -o $@ 
+	$(CXX) $(LDFLAGS) $(LIBS) $(CC_OBJECTS) -shared -o $@
 
 test: ${TEST_RUNNER}
 	@echo "To run test, locally-running etcd is required."
 	LD_LIBRARY_PATH=. ./$< --gmock_verbose=info --gtest_stack_trace_depth=10
 
 ${TEST_RUNNER}: ${TEST_OBJECTS} $(CC_TARGET)
-	${CXX} ${TEST_OBJECTS} -o $@ -L. -lcppetcd  -lgtest $(LDFLAGS)
+	${CXX} ${TEST_OBJECTS} -o $@ -L. -lcppetcd  -lgtest $(LDFLAGS) $(LIBS)
 
 clean:
 	-find ./ -name *.pb.h -exec rm -vf {} \;
