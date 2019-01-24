@@ -43,6 +43,7 @@ install: ${CC_TARGET}
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -I. -c -o $@ $<
 
+PROTOC=`which protoc`
 PROTOC_GRPC_CPP_PLUGIN=`which grpc_cpp_plugin`
 
 PROTOC_OPT=--proto_path=protobuf \
@@ -71,25 +72,25 @@ src/cppetcd.cc: src/etcd/etcdserver/etcdserverpb/rpc.pb.h \
 		 src/etcd/etcdserver/api/v3lock/v3lockpb/v3lock.pb.h
 
 src/etcd/etcdserver/api/v3lock/v3lockpb/v3lock.pb.h : etcd/etcdserver/api/v3lock/v3lockpb/v3lock.proto
-	protoc $(PROTOC_OPT) $<
+	$(PROTOC) $(PROTOC_OPT) $<
 
 src/etcd/etcdserver/etcdserverpb/rpc.pb.h : etcd/etcdserver/etcdserverpb/rpc.proto
-	protoc $(PROTOC_OPT) $<
+	$(PROTOC) $(PROTOC_OPT) $<
 
 src/gogoproto/gogo.pb.h : protobuf/gogoproto/gogo.proto
-	protoc $(PROTOC_OPT) $<
+	$(PROTOC) $(PROTOC_OPT) $<
 
 src/etcd/mvcc/mvccpb/kv.pb.h : etcd/mvcc/mvccpb/kv.proto
-	protoc $(PROTOC_OPT) $<
+	$(PROTOC) $(PROTOC_OPT) $<
 
 src/etcd/auth/authpb/auth.pb.h : etcd/auth/authpb/auth.proto
-	protoc $(PROTOC_OPT) $<
+	$(PROTOC) $(PROTOC_OPT) $<
 
 src/google/api/annotations.pb.h : googleapis/google/api/annotations.proto
-	protoc $(PROTOC_OPT) $<
+	$(PROTOC) $(PROTOC_OPT) $<
 
 src/google/api/http.pb.h : googleapis/google/api/http.proto
-	protoc $(PROTOC_OPT) $<
+	$(PROTOC) $(PROTOC_OPT) $<
 
 src/etcd/etcdserver/etcdserverpb/rpc.pb.o : src/etcd/etcdserver/etcdserverpb/rpc.pb.cc
 src/etcd/etcdserver/etcdserverpb/rpc.grpc.pb.o : src/etcd/etcdserver/etcdserverpb/rpc.pb.cc
