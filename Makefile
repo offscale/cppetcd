@@ -45,10 +45,12 @@ install: ${CC_TARGET}
 
 PROTOC=`which protoc`
 PROTOC_GRPC_CPP_PLUGIN=`which grpc_cpp_plugin`
+PROTOBUF_PROTOPATH=protobuf
+GOOGLEAPIS_PROTOPATH=googleapis
 
-PROTOC_OPT=--proto_path=protobuf \
+PROTOC_OPT=--proto_path=$(PROTOBUF_PROTOPATH) \
 	--plugin=protoc-gen-grpc=$(PROTOC_GRPC_CPP_PLUGIN) \
-	--proto_path=googleapis \
+	--proto_path=$(GOOGLEAPIS_PROTOPATH) \
 	--proto_path=. \
 	--cpp_out=src --grpc_out=src
 
